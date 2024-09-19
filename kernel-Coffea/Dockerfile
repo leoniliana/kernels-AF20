@@ -11,7 +11,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86
 # Put conda in path so we can use conda activate
 ENV PATH=$CONDA_DIR/bin:$PATH
 
-RUN conda install -c conda-forge -y python=3.11 xrootd
+RUN conda install -c conda-forge -y python=3.11 xrootd htcondor
 #RUN conda install conda-libmamba-solver
 
 ENV TINI_VERSION v0.19.0
@@ -27,15 +27,15 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Europe/Zurich #apt-get i
 
 RUN python3 -m pip install \
     htcondor \
-    click==7.1.2 \
+    click \
     ipython \
-    "dask[complete]==2021.11.1" \
-    dask-jobqueue==0.7.3
+    "dask[complete]==2024.4.1" \
+    dask-jobqueue
 
 WORKDIR /usr/local/share/comp-dev-cms-ita
 
 # Install dask remote jobqueue
-RUN git clone --branch AF20-updateNoConda-standalone-longTimeout https://github.com/ttedeschi/dask-remote-jobqueue
+RUN git clone --branch AF20-experimental https://github.com/ttedeschi/dask-remote-jobqueue
 # WORKDIR /usr/local/share/comp-dev-cms-ita/dask-remote-jobqueue
 # RUN python3 setup.py install
 # WORKDIR /usr/local/share/comp-dev-cms-ita
@@ -68,7 +68,7 @@ RUN apt-get update && \
 
 RUN python3 -m pip install ipykernel ipywidgets matplotlib
 
-RUN apt-get -y install davix
+RUN apt-get -y install davix vim
 
 RUN python3 -m pip install coffea==0.7.22 \ 
                               numba>=0.57.0 \ 
@@ -89,3 +89,4 @@ RUN python3 -m pip install coffea==0.7.22 \
                               click
 
 RUN python3 -m pip install rucio-clients
+RUN sed -i 's/condor_submit/condor_submit -spool/g' /opt/conda/lib/python3.11/site-packages/dask_jobqueue/htcondor.py

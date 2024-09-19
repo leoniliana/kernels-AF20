@@ -11,8 +11,12 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86
 # Put conda in path so we can use conda activate
 ENV PATH=$CONDA_DIR/bin:$PATH
 
-RUN conda install -c conda-forge -y python=3.11
-#RUN conda install conda-libmamba-solver
+RUN conda init bash
+RUN echo "conda activate base" >> ~/.bashrc
+
+SHELL ["conda", "run", "-n", "base", "/bin/bash", "-c"]
+
+RUN conda install -c conda-forge -y python=3.11 root boost-cpp
 
 ENV TINI_VERSION v0.19.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /bin/tini
@@ -27,9 +31,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Europe/Zurich #apt-get i
 
 RUN python3 -m pip install \
     htcondor \
-    click==7.1.2 \
+    click \
     ipython \
-    "dask[complete]==2021.11.1" \
+    "dask[complete]==2024.4.1" \
     dask-jobqueue==0.7.3
 
 WORKDIR /usr/local/share/comp-dev-cms-ita
@@ -69,8 +73,6 @@ RUN apt-get update && \
 RUN python3 -m pip install ipykernel ipywidgets matplotlib
 
 RUN apt-get -y install davix
-
-RUN conda install -c conda-forge -y root xrootd
 
 RUN echo /usr/local/lib/root >> /etc/ld.so.conf && ldconfig
 ENV PYTHONPATH /usr/local/lib/root:$PYTHONPATH
